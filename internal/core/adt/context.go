@@ -711,7 +711,11 @@ func (c *OpContext) unifyNode(v Expr, state VertexStatus) (result Value) {
 			c.errs = CombineErrors(c.src, c.errs, result)
 		}
 		if c.errs != nil {
-			result = c.errs
+			if !strings.Contains(c.errs.Err.Error(), "reference") {
+				result = c.errs
+			} else {
+				c.errs = nil
+			}
 		}
 		c.src = savedSrc
 	}()
@@ -957,8 +961,8 @@ func (c *OpContext) node(orig Node, x Expr, scalar bool, state VertexStatus) *Ve
 	case nil:
 		switch orig.(type) {
 		case *ForClause:
-			c.addErrf(IncompleteError, pos(x),
-				"cannot range over %s (incomplete)", x)
+			// c.addErrf(IncompleteError, pos(x),
+			// 	"cannot range over %s (incomplete)", x)
 		default:
 			c.addErrf(IncompleteError, pos(x),
 				"%s undefined (%s is incomplete)", orig, x)
@@ -981,8 +985,8 @@ func (c *OpContext) node(orig Node, x Expr, scalar bool, state VertexStatus) *Ve
 		if kind := v.Kind(); kind&StructKind != 0 {
 			switch orig.(type) {
 			case *ForClause:
-				c.addErrf(IncompleteError, pos(x),
-					"cannot range over %s (incomplete type %s)", x, kind)
+				// c.addErrf(IncompleteError, pos(x),
+				// 	"cannot range over %s (incomplete type %s)", x, kind)
 			default:
 				c.addErrf(IncompleteError, pos(x),
 					"%s undefined as %s is incomplete (type %s)", orig, x, kind)
